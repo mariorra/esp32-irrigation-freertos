@@ -1,0 +1,20 @@
+# PlatformIO
+.pio/
+.vscode/
+*.pyc
+__pycache__/
+.DS_Store
+*.bak
+*.swp
+
+# Arduino / ESP32
+*.bin
+*.elf
+*.hex
+
+# OS
+Thumbs.db
+*.log
+
+# Personal config
+platformio.ini.swp
