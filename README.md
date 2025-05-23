@@ -1,97 +1,134 @@
-cat > README.md << 'EOF'
-# Irrigation System with ESP32, FreeRTOS and ADS1115
-
-## 📦 Description
-
-This project implements an automated irrigation system using an ESP32, two ADS1115 analog-to-digital converters, capacitive soil moisture sensors, and relay-controlled water pumps.
-
-It uses FreeRTOS to assign one task per plant. Each task reads its sensor and controls the corresponding pump independently.
-
-## ⚙ Features
-
-- Support for **8 individual plants**  
-- Two ADS1115 over I2C (`0x48`, `0x49`)  
-- FreeRTOS-based parallel task architecture  
-- **Mutex-protected I2C access** to avoid conflicts  
-- Modular `PlantConfig` struct passed to each task  
-
-## 🔧 Wiring (for ADS1)
-- SDA: GPIO 21
-- SCL: GPIO 22
-- ADDR: GND → 0x48
-
-EOF
-
-
 # 🌿 ESP32 Irrigation System – 8 Plants with ADS1115 & FreeRTOS
 
-## 📦 Overview
+[![PlatformIO](https://img.shields.io/badge/PlatformIO-ESP32-blue)](https://platformio.org/)  [![FreeRTOS](https://img.shields.io/badge/FreeRTOS-ESP32-orange)](https://www.freertos.org/)  [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-This project implements an automated irrigation system using an ESP32, two ADS1115 analog-to-digital converters, capacitive soil moisture sensors, and relay-controlled water pumps.
+## 📦 Project Overview
 
-It uses FreeRTOS to assign one task per plant. Each task reads its sensor and controls the corresponding pump independently.
+Automate plant irrigation with precision! This project leverages an ESP32, dual ADS1115 ADCs, capacitive moisture sensors, and relay-driven pumps. Each of the 8 plants is managed by its own FreeRTOS task, ensuring independent, concurrent control.
 
-## 🧠 Key Features
+## 🎯 Key Features
 
-- Support for **8 individual plants**  
-- Two ADS1115 over I2C (`0x48`, `0x49`)  
-- FreeRTOS-based parallel task architecture  
-- **Mutex-protected I2C access** to avoid conflicts  
-- Modular `PlantConfig` struct passed to each task  
+- **8 independent plant channels** with customizable thresholds
+- Dual ADS1115 modules (I2C addresses `0x48` & `0x49`) for up to 8 analog inputs
+- FreeRTOS-based multitasking for responsive, parallel execution
+- Mutex-protected I2C bus to avoid collisions
+- Modular code structure with `PlantConfig` and UI layers
+- Optional TFT display UI for real-time monitoring
 
-## 📐 Architecture
+## 🚀 Quick Start
 
-main
-├─ feature/docs-base
-├─ dev
-│ ├─ feature/freertos-base
-│ ├─ feature/ads1115-4plants
-│ └─ feature/ads1115-8plants-mutex
-└─ docs/update-ads8-mutex
+### Prerequisites
 
+- ESP32 development board
+- 8 capacitive moisture sensors
+- 8 relay modules (active low)
+- 2 × ADS1115 breakout boards
+- 2.4" ILI9341 TFT (optional)
+- PlatformIO + VSCode or Arduino IDE
 
-## 🔌 Wiring Overview
+### Installation
 
-### ADS1115 #1 (0x48)
-- SDA → GPIO 21  
-- SCL → GPIO 22  
-- Channels 0–3 → Plants 1–4  
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/youruser/irrigation-freertos.git
+   cd irrigation-freertos
+   ```
+2. Open in PlatformIO and install dependencies.
+3. Configure `platformio.ini`:
+   ```ini
+   [env:esp32]
+   platform = espressif32
+   board = esp32dev
+   framework = arduino
 
-### ADS1115 #2 (0x49)
-- SDA → GPIO 21  
-- SCL → GPIO 22  
-- Channels 0–3 → Plants 5–8  
+   lib_deps =
+     adafruit/Adafruit ADS1X15@^1.1.0
+     adafruit/Adafruit ILI9341@^1.5.8    ; optional TFT UI
+     adafruit/Adafruit GFX Library@^1.10.10  ; optional TFT UI
+   ```
+4. Wire your hardware (see Wiring section).
+5. Build & upload:
+   ```bash
+   pio run --target upload
+   ```
 
-### Relays
-- Plant 1 → GPIO 2
-- Plant 2 → GPIO 4
-- Plant 3 → GPIO 5
-- Plant 4 → GPIO 15
-- Plant 5 → GPIO 16
-- Plant 6 → GPIO 17
-- Plant 7 → GPIO 18
-- Plant 8 → GPIO 19
+## 🔌 Hardware Wiring
 
+### ADS1115 Modules
 
-## 🔐 Concurrency and Mutex Usage
+| Module     | ADDR Pin | I2C Address | SDA Pin | SCL Pin |
+|------------|----------|-------------|---------|---------|
+| ADS1115 #1 | GND      | 0x48        | 21      | 22      |
+| ADS1115 #2 | VCC      | 0x49        | 21      | 22      |
 
-Access to the shared I2C bus is **protected with a FreeRTOS mutex**, ensuring safe concurrent readings from the ADS1115 devices.
+### Relay Pins
 
-Each task:
+| Plant | Relay GPIO |
+|-------|------------|
+| 1     | 2          |
+| 2     | 4          |
+| 3     | 5          |
+| 4     | 15         |
+| 5     | 16         |
+| 6     | 17         |
+| 7     | 18         |
+| 8     | 19         |
 
-1. Takes the mutex before I2C read  
-2. Reads from its assigned ADS1115 + channel  
-3. Releases the mutex  
-4. Controls its relay based on moisture  
+### TFT Display (Optional)
+
+```
+TFT_CS  → GPIO 15
+TFT_DC  → GPIO 2
+TFT_RST → GPIO 4
+MOSI    → GPIO 23
+MISO    → GPIO 19
+SCK     → GPIO 18
+```  
 
 ## 📁 Project Structure
 
-- `main.cpp` – Initialization and FreeRTOS task creation  
-- `PlantConfig` – Struct containing per-plant configuration  
-- `irrigationTask()` – Logic for reading, mutex use, and pump control  
+```
+├── src/
+│   ├── main.cpp          ; entry & task startup
+│   ├── PlantConfig.h/.cpp ; core irrigation logic
+│   ├── TFTDisplay.h/.cpp ; optional UI module
+│   └── ...
+├── include/              ; global headers
+├── platformio.ini
+├── README.md
+├── CHANGELOG.md
+└── TODO.md
+```
+
+## 🔐 Concurrency & Task Flow
+
+Each plant spawns a task with its own `PlantConfig`, containing:
+- ADC pointer & channel
+- Relay pin
+- I2C mutex
+- Threshold & timing values
+
+**Task loop:**
+1. `xSemaphoreTake()` to lock I2C
+2. Read ADC channel
+3. `xSemaphoreGive()` to release I2C
+4. Compare value to threshold → activate pump if needed
+5. Delay until next check
+
+## 🖥UI Monitoring (2.4" TFT)
+
+Optional real-time dashboard:
+- Bars showing moisture % per plant
+- Indicator circles & page navigation
+- UI handled by `TFTDisplay` class
 
 ## 📋 Next Steps
 
-- Add error logging, retries or fallback logic  
-- Expose moisture levels via serial/MQTT  
-- Modularize task creation into `PlantController.cpp`  
+- [ ] Calibrate thresholds per plant
+- [ ] Implement NVS storage for settings
+- [ ] Add MQTT telemetry
+- [ ] Integrate error logging & watchdog reset
+- [ ] Release v0.2.0-beta
+
+---
+
