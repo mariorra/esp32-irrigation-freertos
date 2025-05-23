@@ -89,11 +89,12 @@ SCK     → GPIO 18
 
 ```
 ├── src/
-│   ├── main.cpp          ; entry & task startup
-│   ├── PlantConfig.h/.cpp ; core irrigation logic
-│   ├── TFTDisplay.h/.cpp ; optional UI module
+│   ├── main.cpp              ; entry & task startup
+│   ├── PlantConfig.h/.cpp    ; core irrigation logic
+│   ├── PlantController.h/.cpp; task factory and logic
+│   ├── TFTDisplay.h/.cpp     ; optional UI module
 │   └── ...
-├── include/              ; global headers
+├── include/                  ; global headers
 ├── platformio.ini
 ├── README.md
 ├── CHANGELOG.md
@@ -119,12 +120,13 @@ Each plant spawns a task with its own `PlantConfig`, containing:
 
 Optional real-time dashboard:
 - Bars showing moisture % per plant
-- Indicator circles & page navigation
-- UI handled by `TFTDisplay` class
+- White-border bars, top indicator circles & percentage labels
+- Page navigation for plants 1–4 and 5–8
+- Handled by TFTDisplay class in its own FreeRTOS task
 
 ## 📋 Next Steps
 
-- [ ] Calibrate thresholds per plant
+- [x] Calibrate thresholds per plant
 - [ ] Implement NVS storage for settings
 - [ ] Add MQTT telemetry
 - [ ] Integrate error logging & watchdog reset

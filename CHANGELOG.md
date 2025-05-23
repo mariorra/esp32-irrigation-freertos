@@ -1,4 +1,3 @@
-cat > CHANGELOG.md << 'EOF'
 # 📄 Changelog
 
 All notable changes to this project will be documented in this file.
@@ -12,10 +11,15 @@ All notable changes to this project will be documented in this file.
 - `PlantConfig` extended to store ADC and channel
 - FreeRTOS semaphore to protect I2C access (mutex)
 - Modular scaling to support 8 plants
+- **UI Module**: `TFTDisplay` class for 2.4" ILI9341 TFT
+- FreeRTOS `displayTask` to cycle between plant pages
+- PlatformIO dependencies added for Adafruit ILI9341 & GFX libraries
+- Documentation updates in README, CHANGELOG, TODO for UI integration
 
 ### Changed
-- Task logic adapted to use structured config
-- Main loop now initializes two ADCs and dispatches 8 tasks
+- `main.cpp`: integrated `displayTask`, structured init sequence
+- Improved README with badges, wiring tables, and usage instructions
+- Updated TODO.md with UI-specific tasks and roadmap
 
 ---
 
@@ -24,4 +28,3 @@ All notable changes to this project will be documented in this file.
 - Modular `PlantConfig` with pointer to ADS
 - 4 tasks, one per plant
 - Dynamic memory and task assignment using FreeRTOS
-EOF
