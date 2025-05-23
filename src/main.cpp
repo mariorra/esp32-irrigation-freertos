@@ -1,34 +1,47 @@
 #include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_ADS1X15.h>
 
-// Analog pins (ADC1) for moisture sensors
-const int sensorPins[4] = {34, 35, 32, 33};
-// Digital pins for pump relays
-const int relayPins[4] = {2, 4, 5, 15};
+// Configuration structure passed to each task
+  struct PlantConfig {
+    uint8_t channel;                 // ADS1115 analog input channel (0-3)
+    Adafruit_ADS1115* adc;           // Pointer to the ADC instance
+    uint8_t relayPin;                // GPIO pin for controlling the pump relay
+  };
 
 // Moisture threshold (higher = drier)
-const int moistureThreshold = 2000;
+  const int moistureThreshold = 2000;
 // Pump active time in milliseconds
-const int wateringDuration = 5000;
+  const int wateringDuration = 5000;
 // Delay between sensor checks
-const int checkInterval = 10000;
+  const int checkInterval = 20000;
 
-// FreeRTOS task to manage each plant
+// ADS1115 instance
+  Adafruit_ADS1115 ads;  
+
+// FreeRTOS task to manage each plant, defined a unique task for all the plants
+// Goal is to reduce the ammount of coding puting generic definition as the expected behaviour is the same 
 void irrigationTask(void* param) {
-  int plantNumber = *((int*)param);
-  int sensorPin = sensorPins[plantNumber];
-  int relayPin = relayPins[plantNumber];
+  PlantConfig* cfg = (PlantConfig*)param; //Access the number stored at the memory address pointed to by param, treating it as a pointer to an integer. Using casting method. 
+  
+  int channel = cfg->channel;
+  uint8_t relayPin = cfg->relayPin;
+  Adafruit_ADS1115* adc = cfg->adc;
+
+  delete cfg; // not needed anymore as we pass the value to the plantNumber identifier, free heap memory. 
+  param = nullptr; // Defensive: avoid dangling pointer (not strictly needed here)
 
   while (true) {
-    int moisture = analogRead(sensorPin);
-    Serial.printf("[Plant %d] Moisture: %d\n", plantNumber + 1, moisture);
+    int moisture = adc->readADC_SingleEnded(channel);
+    Serial.printf("[Plant %d] Moisture: %d\n", channel + 1, moisture);
 
     if (moisture > moistureThreshold) {
-      Serial.printf("[Plant %d] --> Dry soil, activating pump\n", plantNumber + 1);
+      Serial.printf("[Plant %d] --> Dry soil, activating pump\n", channel + 1);
       digitalWrite(relayPin, LOW);  // Relay ON
       vTaskDelay(pdMS_TO_TICKS(wateringDuration));
       digitalWrite(relayPin, HIGH); // Relay OFF
     } else {
-      Serial.printf("[Plant %d] --> Moist soil, no watering\n", plantNumber + 1);
+      Serial.printf("[Plant %d] --> Moist soil, no watering\n", channel + 1);
     }
 
     vTaskDelay(pdMS_TO_TICKS(checkInterval));
@@ -37,9 +50,22 @@ void irrigationTask(void* param) {
 
 void setup() {
   Serial.begin(115200);
+  Serial.println("SETUP: first print ");
+  const char *pcTaskError = "Error creating task! ";
+
+  Wire.begin(21, 22);// SDA = GPIO 21, SCL = GPIO 22
+  Serial.println("SETUP: I2C created");
+
+  if (!ads.begin(0x48)) {  // I2C address of the ADS1115
+    Serial.println("Failed to initialize ADS1115. Check wiring!");
+    while (1);
+  }
+
+  Serial.println("ADS1115 initialized.");
+//Relay definition
+  const uint8_t relayPins[4] = {2, 4, 5, 15};
 
   for (int i = 0; i < 4; i++) {
-    pinMode(sensorPins[i], INPUT);
     pinMode(relayPins[i], OUTPUT);
     digitalWrite(relayPins[i], HIGH); // Relay OFF by default
 
