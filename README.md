@@ -89,13 +89,15 @@ SCK     → GPIO 18
 ## 📁 Project Structure
 
 ```
+├── include/
+│   ├── PlantConfig.h
+│   ├── PlantController.h
+│   └── TFTDisplay.h
 ├── src/
-│   ├── main.cpp              ; entry & task startup
-│   ├── PlantConfig.h/.cpp    ; core irrigation logic
-│   ├── PlantController.h/.cpp; task factory and logic
-│   ├── TFTDisplay.h/.cpp     ; optional UI module
-│   └── ...
-├── include/                  ; global headers
+│   ├── main.cpp
+│   ├── PlantConfig.cpp
+│   ├── PlantController.cpp
+│   └── TFTDisplay.cpp
 ├── platformio.ini
 ├── README.md
 ├── CHANGELOG.md
