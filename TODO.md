@@ -1,15 +1,38 @@
-# TODO – UI for 2.4" TFT (feature/ui-tft)
+# ✅ TODO – Irrigation-FreeRTOS System
 
-### ✅ Completed
+---
+
+## 🚧 Current Feature Branch: `feature/ui-tft`
+
+### 📺 UI for 2.4" TFT Display
+
 - [x] Wire ILI9341 pins (CS, DC, RST) to ESP32 and test init  
 - [x] Implement `TFTDisplay.begin()` and `showPage()`  
 - [x] Integrate `display.showPage()` in a dedicated FreeRTOS task  
 - [x] Cycle pages (plants 1–4 / 5–8) via timeout  
+- [ ] Measure render time & ensure FreeRTOS responsiveness  
 
-### 🔜 Next Steps
-- [ ] Add physical button or touch input to manually switch pages  
-- [ ] Optimize redraw logic to update only changed elements  
-- [ ] Measure render time & ensure no FreeRTOS deadlines are missed  
-- [ ] Add error handling if display init or writes fail  
-- [ ] Document UI module usage in `feature/docs-base` or new docs branch  
-- [ ] Prepare for release: bump version, finalize CHANGELOG and README  
+---
+
+## 🧩 Next Feature Branch: `feature/plantcontroller-modular`
+
+### 🧱 Modular Refactor – `PlantController`
+
+- [ ] Create `PlantController.h/.cpp` to encapsulate irrigation logic  
+- [ ] Move logic from `irrigationTask()` inside the class  
+- [ ] Make a static `startTask(PlantConfig*)` method to launch per-plant task  
+- [ ] Refactor `main.cpp` to use `PlantController` class  
+- [ ] Ensure memory is properly freed and tasks are stable  
+
+---
+
+## 💡 Future Ideas
+
+### 🌐 Connectivity
+
+- [ ] Integrate Wi-Fi and send data via MQTT  
+- [ ] Enable OTA updates  
+- [ ] Add local manual override (button or serial input)  
+
+---
+

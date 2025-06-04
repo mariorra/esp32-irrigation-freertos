@@ -12,8 +12,9 @@ Automate plant irrigation with precision! This project leverages an ESP32, dual 
 - Dual ADS1115 modules (I2C addresses `0x48` & `0x49`) for up to 8 analog inputs
 - FreeRTOS-based multitasking for responsive, parallel execution
 - Mutex-protected I2C bus to avoid collisions
-- Modular code structure with `PlantConfig` and UI layers
 - Optional TFT display UI for real-time monitoring
+- Code modularized via `PlantConfig`, `PlantController`, and `TFTDisplay` classes  
+
 
 ## 🚀 Quick Start
 
@@ -88,13 +89,15 @@ SCK     → GPIO 18
 ## 📁 Project Structure
 
 ```
+├── include/
+│   ├── PlantConfig.h
+│   ├── PlantController.h
+│   └── TFTDisplay.h
 ├── src/
-│   ├── main.cpp              ; entry & task startup
-│   ├── PlantConfig.h/.cpp    ; core irrigation logic
-│   ├── PlantController.h/.cpp; task factory and logic
-│   ├── TFTDisplay.h/.cpp     ; optional UI module
-│   └── ...
-├── include/                  ; global headers
+│   ├── main.cpp
+│   ├── PlantConfig.cpp
+│   ├── PlantController.cpp
+│   └── TFTDisplay.cpp
 ├── platformio.ini
 ├── README.md
 ├── CHANGELOG.md
@@ -127,6 +130,10 @@ Optional real-time dashboard:
 ## 📋 Next Steps
 
 - [x] Calibrate thresholds per plant
+- [x] Support 8 plants using dual ADS1115
+- [x] Add UI display for live status
+- [x] Modularize task logic with PlantController
+- [x] Calibrate thresholds & log dry events
 - [ ] Implement NVS storage for settings
 - [ ] Add MQTT telemetry
 - [ ] Integrate error logging & watchdog reset

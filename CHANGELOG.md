@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+
+### Added – feature/plantcontroller-modular
+
+- New `PlantController` module to encapsulate irrigation task logic
+
+### Changed
+- Task creation now handled via modular class
+
+
 ## [Unreleased] – feature/ads1115-8plants-mutex
 
 ### Added
